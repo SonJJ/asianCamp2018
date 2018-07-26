@@ -86,7 +86,8 @@ class MyLSTM:
         for i in range(10000):
             self.sess.run(train, feed_dict={self.X: trainX, self.Y: trainY})
             step_loss = self.sess.run(self.loss, feed_dict={self.X: trainX, self.Y: trainY})
-            print(i, step_loss)
+            if(i%100 == 0):
+                print(i, step_loss)
         # log = tf.Session(config=tf.ConfigProto(log_device_placement=True))
         # print(log.run(self.loss))
 
