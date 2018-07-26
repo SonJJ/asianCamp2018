@@ -53,7 +53,7 @@ class MyDB:
 class MyLSTM:
     db = MyDB()
 
-    seq_length = 7
+    seq_length = 14
     input_dim = 5
     output_dim = 1  # 출력수
 
@@ -68,14 +68,14 @@ class MyLSTM:
         cell = tf.contrib.rnn.BasicLSTMCell(num_units=self.output_dim, state_is_tuple=True)
         outputs, _states = tf.nn.dynamic_rnn(cell, self.X, dtype=tf.float32)
         self.hypo = outputs[:, -1]
-        #
+
 
         self.loss = tf.reduce_sum(tf.square(self.hypo - self.Y))
 
     def learn(self):
         tf.set_random_seed(777)
         self.init_network()
-        train = tf.train.GradientDescentOptimizer(0.05).minimize(self.loss)
+        train = tf.train.GradientDescentOptimizer(0.03).minimize(self.loss)
 
         self.db.load_normalized('visitorCount.csv')  # 파일명
         trainX, trainY = self.db.get_traindata(self.seq_length)
@@ -108,7 +108,7 @@ class MyLSTM:
         plt.plot(predicted)
         plt.xlabel("Time period")
         plt.ylabel("people")
-        plt.show()
+        plt.imsave()
 
 guy = MyLSTM()
 guy.learn()
