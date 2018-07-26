@@ -73,13 +73,12 @@ class MyLSTM:
         self.loss = tf.reduce_sum(tf.square(self.hypo - self.Y))
 
     def learn(self):
-        with tf.device('/gpu:0'):
-            tf.set_random_seed(777)
-            self.init_network()
-            train = tf.train.GradientDescentOptimizer(0.05).minimize(self.loss)
+        tf.set_random_seed(777)
+        self.init_network()
+        train = tf.train.GradientDescentOptimizer(0.05).minimize(self.loss)
 
-            self.db.load_normalized('visitorCount.csv')  # 파일명
-            trainX, trainY = self.db.get_traindata(self.seq_length)
+        self.db.load_normalized('visitorCount.csv')  # 파일명
+        trainX, trainY = self.db.get_traindata(self.seq_length)
 
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
@@ -87,8 +86,8 @@ class MyLSTM:
         for i in range(500000):
             self.sess.run(train, feed_dict={self.X: trainX, self.Y: trainY})
             step_loss = self.sess.run(self.loss, feed_dict={self.X: trainX, self.Y: trainY})
-
             print(i, step_loss)
+
 
     def predict(self):
         # RMSE
@@ -107,7 +106,7 @@ class MyLSTM:
         plt.ylabel("people")
         plt.show()
 
-
-guy = MyLSTM()
-guy.learn()
-guy.predict()
+with tf.device('/gpu:0'):
+    guy = MyLSTM()
+    guy.learn()
+    guy.predict()
