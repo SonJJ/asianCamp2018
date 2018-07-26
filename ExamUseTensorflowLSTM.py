@@ -83,7 +83,7 @@ class MyLSTM:
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
 
-        for i in range(500000):
+        for i in range(1000):
             self.sess.run(train, feed_dict={self.X: trainX, self.Y: trainY})
             step_loss = self.sess.run(self.loss, feed_dict={self.X: trainX, self.Y: trainY})
             print(i, step_loss)
@@ -108,5 +108,8 @@ class MyLSTM:
 
 with tf.device('/gpu:0'):
     guy = MyLSTM()
-    guy.learn()
-    guy.predict()
+    # guy.learn()
+    # guy.predict()
+    log = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+    print(log.run(guy.learn()))
+    print(log.run(guy.predict()))
