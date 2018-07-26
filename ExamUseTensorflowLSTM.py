@@ -87,7 +87,8 @@ class MyLSTM:
             self.sess.run(train, feed_dict={self.X: trainX, self.Y: trainY})
             step_loss = self.sess.run(self.loss, feed_dict={self.X: trainX, self.Y: trainY})
             print(i, step_loss)
-
+        log = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+        print(log.run(self.loss))
 
     def predict(self):
         # RMSE
@@ -100,6 +101,9 @@ class MyLSTM:
         err = self.sess.run(rmse, feed_dict={Y: testY, P: predicted})
         print("RMSE: ", err)
 
+        log = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+        print(log.run(rmse))
+
         plt.plot(testY)
         plt.plot(predicted)
         plt.xlabel("Time period")
@@ -108,8 +112,5 @@ class MyLSTM:
 
 with tf.device('/gpu:0'):
     guy = MyLSTM()
-    # guy.learn()
-    # guy.predict()
-    log = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-    print(log.run(guy.learn()))
-    print(log.run(guy.predict()))
+    guy.learn()
+    guy.predict()
