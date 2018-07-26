@@ -73,12 +73,13 @@ class MyLSTM:
         self.loss = tf.reduce_sum(tf.square(self.hypo - self.Y))
 
     def learn(self):
-        tf.set_random_seed(777)
-        self.init_network()
-        train = tf.train.GradientDescentOptimizer(0.05).minimize(self.loss)
+        with tf.device('/gpu:0'):
+            tf.set_random_seed(777)
+            self.init_network()
+            train = tf.train.GradientDescentOptimizer(0.05).minimize(self.loss)
 
-        self.db.load_normalized('visitorCount.csv')  # 파일명
-        trainX, trainY = self.db.get_traindata(self.seq_length)
+            self.db.load_normalized('visitorCount.csv')  # 파일명
+            trainX, trainY = self.db.get_traindata(self.seq_length)
 
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
