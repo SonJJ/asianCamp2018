@@ -83,7 +83,7 @@ class MyLSTM:
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
 
-        for i in range(1000):
+        for i in range(10000):
             self.sess.run(train, feed_dict={self.X: trainX, self.Y: trainY})
             step_loss = self.sess.run(self.loss, feed_dict={self.X: trainX, self.Y: trainY})
             print(i, step_loss)
