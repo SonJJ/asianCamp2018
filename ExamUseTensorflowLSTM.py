@@ -110,7 +110,6 @@ class MyLSTM:
         plt.ylabel("people")
         plt.show()
 
-with tf.device('/gpu:0'):
-    guy = MyLSTM()
-    guy.learn()
-    guy.predict()
+guy = MyLSTM()
+guy.learn()
+guy.predict()
