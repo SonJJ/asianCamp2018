@@ -53,7 +53,7 @@ class MyDB:
 class MyLSTM:
     db = MyDB()
 
-    seq_length = 14
+    seq_length = 7
     input_dim = 5
     output_dim = 1  # 출력수
 
@@ -75,7 +75,7 @@ class MyLSTM:
     def learn(self):
         tf.set_random_seed(777)
         self.init_network()
-        train = tf.train.GradientDescentOptimizer(0.03).minimize(self.loss)
+        train = tf.train.GradientDescentOptimizer(0.01).minimize(self.loss)
 
         self.db.load_normalized('visitorCount.csv')  # 파일명
         trainX, trainY = self.db.get_traindata(self.seq_length)
@@ -83,11 +83,12 @@ class MyLSTM:
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
 
-        for i in range(10000):
+        for i in range(100000):
             self.sess.run(train, feed_dict={self.X: trainX, self.Y: trainY})
             step_loss = self.sess.run(self.loss, feed_dict={self.X: trainX, self.Y: trainY})
             if(i%100 == 0):
                 print(i, step_loss)
+
         # log = tf.Session(config=tf.ConfigProto(log_device_placement=True))
         # print(log.run(self.loss))
 
@@ -109,7 +110,10 @@ class MyLSTM:
         plt.plot(predicted)
         plt.xlabel("Time period")
         plt.ylabel("people")
-        plt.imsave()
+        plt.show()
+
+        saver = tf.train.Saver()
+        saver.save(self.sess, './my_test_model')
 
 guy = MyLSTM()
 guy.learn()
