@@ -56,6 +56,10 @@ class MyLSTM:
     seq_length = 7
     input_dim = 5
     output_dim = 1  # 출력수
+    forget_bias = 1.0
+    keep_prob = 1.0
+    leaningRate = 0.0005
+    count = 100000   #leaning_count
 
     X = tf.placeholder(tf.float32, [None, seq_length, input_dim])  # [None, 7, 5] , 무한 5개출력 7줄 1box
     Y = tf.placeholder(tf.float32, [None, 1])
@@ -64,18 +68,27 @@ class MyLSTM:
     loss = None
     sess = None
 
+    def cell(self):
+        cell = tf.contrib.rnn.BasicLSTMCell(num_units=self.output_dim, forget_bias=self.forget_bias,
+                                            state_is_tuple=True, activation=tf.nn.softsign)
+        if self.keep_prob < 1.0:
+            cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob = self.keep_prob)
+
+        return cell
+
     def init_network(self):
-        cell = tf.contrib.rnn.BasicLSTMCell(num_units=self.output_dim, state_is_tuple=True)
-        outputs, _states = tf.nn.dynamic_rnn(cell, self.X, dtype=tf.float32)
+        outputs, _states = tf.nn.dynamic_rnn(self.cell(), self.X, dtype=tf.float32)
         self.hypo = outputs[:, -1]
 
 
         self.loss = tf.reduce_sum(tf.square(self.hypo - self.Y))
 
     def learn(self):
+
         tf.set_random_seed(777)
         self.init_network()
-        train = tf.train.GradientDescentOptimizer(0.01).minimize(self.loss)
+        #Optimizer
+        train = tf.train.AdamOptimizer(self.leaningRate).minimize(self.loss)
 
         self.db.load_normalized('visitorCount.csv')  # 파일명
         trainX, trainY = self.db.get_traindata(self.seq_length)
@@ -83,14 +96,19 @@ class MyLSTM:
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
 
-        for i in range(100000):
+        for i in range(self.count):
             self.sess.run(train, feed_dict={self.X: trainX, self.Y: trainY})
             step_loss = self.sess.run(self.loss, feed_dict={self.X: trainX, self.Y: trainY})
             if(i%100 == 0):
                 print(i, step_loss)
+            elif(i == self.count):
+                print(i, step_loss)
 
-        # log = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-        # print(log.run(self.loss))
+        text1 = "Rate:"+str(self.leaningRate) + ", Length:" + str(self.seq_length)\
+                + ", Count:" + str(self.count)
+        print("====================")
+        print(text1)
+        print("====================")
 
     def predict(self):
         # RMSE
@@ -101,20 +119,27 @@ class MyLSTM:
         testX, testY = self.db.get_testdata(self.seq_length)
         predicted = self.sess.run(self.hypo, feed_dict={self.X: testX})
         err = self.sess.run(rmse, feed_dict={Y: testY, P: predicted})
-        print("RMSE: ", err)
 
-        # log = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-        # print(log.run(rmse))
+        print("====================")
+        print("RMSE: ", err)
+        print("====================")
 
         plt.plot(testY)
         plt.plot(predicted)
         plt.xlabel("Time period")
         plt.ylabel("people")
-        plt.show()
+        plt.title(str(self.leaningRate)+str(self.count)+str(err))
 
+        #model_save
+        savePoint = "./RMSE_"+str(err)+"/test_"+str(err)
         saver = tf.train.Saver()
-        saver.save(self.sess, './my_test_model')
+        saver.save(self.sess, savePoint)
 
-guy = MyLSTM()
-guy.learn()
-guy.predict()
+        #plt_save
+        fig = plt.gcf()
+        plt.show()
+        fig.savefig('./RMSE_'+str(err)+'/plt.pdf')
+
+start = MyLSTM()
+start.learn()
+start.predict()
