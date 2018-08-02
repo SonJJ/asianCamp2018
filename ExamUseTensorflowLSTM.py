@@ -1,7 +1,8 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-
+import matplotlib as mat
+mat.use('Agg')
 
 class MyDB:
     xy = None
@@ -58,8 +59,8 @@ class MyLSTM:
     output_dim = 1  # 출력수
     forget_bias = 1.0
     keep_prob = 1.0
-    leaningRate = 0.0005
-    count = 100000   #leaning_count
+    leaningRate = 0.001
+    count = 1000   #leaning_count
 
     X = tf.placeholder(tf.float32, [None, seq_length, input_dim])  # [None, 7, 5] , 무한 5개출력 7줄 1box
     Y = tf.placeholder(tf.float32, [None, 1])
@@ -128,7 +129,7 @@ class MyLSTM:
         plt.plot(predicted)
         plt.xlabel("Time period")
         plt.ylabel("people")
-        plt.title(str(self.leaningRate)+str(self.count)+str(err))
+        plt.title(str(self.leaningRate)+", "+str(self.count)+", RMSE:"+str(err))
 
         #model_save
         savePoint = "./RMSE_"+str(err)+"/test_"+str(err)
@@ -137,8 +138,8 @@ class MyLSTM:
 
         #plt_save
         fig = plt.gcf()
-        plt.show()
         fig.savefig('./RMSE_'+str(err)+'/plt.pdf')
+        # plt.show()
 
 start = MyLSTM()
 start.learn()
